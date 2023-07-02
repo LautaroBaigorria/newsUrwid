@@ -15,6 +15,11 @@ class App(object):
         lista = self.news.loadyaml()
         title = "News"
         body = [urwid.Text(title), urwid.Divider()]
+        buttonShowRecentNews = urwid.Button("Mostrar noticias recientes")
+        urwid.connect_signal(buttonShowRecentNews, 'click',self.gridFlowArticles)
+        body.append(buttonShowRecentNews)
+        body.append(urwid.Divider())
+
         for element in lista:
             button = urwid.Button(element["titulo"])
             # linea a conectar con submenu()
@@ -22,9 +27,7 @@ class App(object):
             singleLink = element["link"]
             urwid.connect_signal(button, 'click',self.submenu,singleLink)
             body.append(urwid.AttrMap(button, None, focus_map='reversed'))
-        buttonShowRecentNews = urwid.Button("Mostrar noticias recientes")
-        urwid.connect_signal(buttonShowRecentNews, 'click',self.gridFlowArticles)
-        body.append(buttonShowRecentNews)
+
         return urwid.ListBox(urwid.SimpleFocusListWalker(body))
 
     def menu2(self, button):
@@ -58,7 +61,7 @@ class App(object):
         urwid.connect_signal(done, 'click', self.exit_program)
         urwid.connect_signal(testing, 'click', self.menu2)
         main.original_widget = urwid.ListBox(urwid.SimpleFocusListWalker(body))
-        
+
     def showArticle(self, button, feedElement):
         body = [urwid.Text(feedElement.title)]
         text = f"{feedElement.description}"
@@ -86,20 +89,17 @@ class App(object):
             # feedElement = self.news.parselink(element["link"])
             if element.entries:
                 textToInclude = f"{element['feed']['title']}  -  {element.entries[0].title}"
-                cells.append(urwid.Text(textToInclude, align='left'))
-            lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-            
-            
+                text = urwid.Text(textToInclude, align='left')
+                widgetWithLine = urwid.LineBox(text)
+                widget = urwid.Padding(widgetWithLine, align='center', width=('relative', 100))
+                cells.append(widget)
         cell_width = 20
-        h_sep = 1
-        v_sep = 1
+        h_sep = 0
+        v_sep = 0
         align = 'center'
         grid = urwid.GridFlow(cells, cell_width, h_sep, v_sep, align)
         body.append(grid)
         main.original_widget = urwid.ListBox(urwid.SimpleFocusListWalker(body))
-
-        # grid_filler = urwid.Filler(grid, valign='middle')
-        # main.original_widget = grid_filler
 
     def exit_program(self, button):
         raise urwid.ExitMainLoop()
@@ -109,5 +109,5 @@ class App(object):
 if __name__ == '__main__':
     app = App()
     main = urwid.Padding(app.menu(), left=2, right=2)
-    top = urwid.Overlay(main, urwid.SolidFill('\N{MEDIUM SHADE}') , align='center', width=('relative', 60),valign='middle', height=('relative', 60), min_width=20, min_height=9)
-    urwid.MainLoop(top, palette=[('reversed', 'standout', '')], unhandled_input=app.exit_on_q).run()
+    # top = urwid.Overlay(main, urwid.SolidFill('\N{MEDIUM SHADE}') , align='center', width=('relative', 90),valign='middle', height=('relative', 90), min_width=20, min_height=9)
+    urwid.MainLoop(main, palette=[('reversed', 'standout', '')], unhandled_input=app.exit_on_q).run()
